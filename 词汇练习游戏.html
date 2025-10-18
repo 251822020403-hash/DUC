@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连字成句游戏</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+        }
+        
+        .description {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .question-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .question-btn {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .question-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .question-btn.active {
+            background-color: #2c3e50;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            min-height: 120px;
+        }
+        
+        .card {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+            background-color: #e3f2fd;
+        }
+        
+        .card.selected {
+            background-color: #3498db;
+            color: white;
+            transform: scale(0.95);
+        }
+        
+        .sentence-area {
+            min-height: 100px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #bdc3c7;
+        }
+        
+        .sentence-word {
+            padding: 8px 15px;
+            background-color: #2ecc71;
+            color: white;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .reset-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .hint {
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .card {
+                width: 60px;
+                height: 60px;
+                font-size: 1.3rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>连字成句游戏</h1>
+    <p class="description">点击汉字卡片，按顺序组成正确的句子</p>
+    
+    <div class="container">
+        <div class="question-selector">
+            <button class="question-btn active" data-id="0">题目一</button>
+            <button class="question-btn" data-id="1">题目二</button>
+            <button class="question-btn" data-id="2">题目三</button>
+            <button class="question-btn" data-id="3">题目四</button>
+        </div>
+        
+        <div class="game-area">
+            <div class="cards-container" id="cardsContainer">
+                <!-- 汉字卡片将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="sentence-area" id="sentenceArea">
+                <p>点击上面的汉字卡片开始组句</p>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn submit-btn" id="submitBtn">提交答案</button>
+            <button class="btn reset-btn" id="resetBtn">重新开始</button>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <p class="hint">提示：点击汉字卡片按顺序组成句子，完成后点击"提交答案"</p>
+    </div>
+
+    <script>
+        // 题目数据
+        const questions = [
+            {
+                characters: ['家', '学校', '到', '公共汽车', '坐', '一', '我', '要', '从', '个', '多', '小时', '的'],
+                answers: ['从我家到学校要坐一个多小时的公共汽车']
+            },
+            {
+                characters: ['一', '别人', '的', '好', '大卫', '帮助', '喜欢', '个', '是', '孩子'],
+                answers: ['大卫是一个喜欢帮助别人的好孩子']
+            },
+            {
+                characters: ['非常', '欢迎', '公司', '来', '你', '我们', '工作'],
+                answers: ['非常欢迎你来我们公司工作']
+            },
+            {
+                characters: ['和', '一起', '我', '咖啡厅', '朋友们', '去', '了', '昨天'],
+                answers: ['我昨天和朋友们一起去咖啡厅了', '昨天我和朋友们一起去咖啡厅了']
+            }
+        ];
+
+        // DOM元素
+        const cardsContainer = document.getElementById('cardsContainer');
+        const sentenceArea = document.getElementById('sentenceArea');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultDiv = document.getElementById('result');
+        const questionBtns = document.querySelectorAll('.question-btn');
+
+        // 游戏状态
+        let currentQuestion = 0;
+        let selectedCards = [];
+        let shuffledCards = [];
+
+        // 初始化游戏
+        function initGame() {
+            // 重置状态
+            selectedCards = [];
+            shuffledCards = [...questions[currentQuestion].characters];
+            
+            // 随机打乱卡片
+            shuffleArray(shuffledCards);
+            
+            // 清空容器
+            cardsContainer.innerHTML = '';
+            sentenceArea.innerHTML = '<p>点击上面的汉字卡片开始组句</p>';
+            resultDiv.style.display = 'none';
+            
+            // 创建卡片
+            shuffledCards.forEach((char, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = char;
+                card.dataset.index = index;
+                card.addEventListener('click', () => selectCard(card, index));
+                cardsContainer.appendChild(card);
+            });
+        }
+
+        // 打乱数组
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 选择卡片
+        function selectCard(card, index) {
+            // 如果卡片已经被选中，则取消选择
+            if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                const cardIndex = selectedCards.indexOf(index);
+                if (cardIndex > -1) {
+                    selectedCards.splice(cardIndex, 1);
+                }
+            } else {
+                // 否则选中卡片
+                card.classList.add('selected');
+                selectedCards.push(index);
+            }
+            
+            // 更新句子区域
+            updateSentenceArea();
+        }
+
+        // 更新句子区域
+        function updateSentenceArea() {
+            sentenceArea.innerHTML = '';
+            
+            if (selectedCards.length === 0) {
+                sentenceArea.innerHTML = '<p>点击上面的汉字卡片开始组句</p>';
+                return;
+            }
+            
+            selectedCards.forEach(cardIndex => {
+                const word = document.createElement('div');
+                word.className = 'sentence-word';
+                word.textContent = shuffledCards[cardIndex];
+                sentenceArea.appendChild(word);
+            });
+        }
+
+        // 提交答案
+        function submitAnswer() {
+            const userSentence = selectedCards.map(index => shuffledCards[index]).join('');
+            const correctAnswers = questions[currentQuestion].answers;
+            
+            // 检查答案是否正确
+            const isCorrect = correctAnswers.some(answer => 
+                userSentence.replace(/\s/g, '') === answer.replace(/\s/g, '')
+            );
+            
+            // 显示结果
+            resultDiv.style.display = 'block';
+            if (isCorrect) {
+                resultDiv.textContent = '恭喜！句子正确！';
+                resultDiv.className = 'result success';
+            } else {
+                resultDiv.textContent = '句子不正确，请再试一次！';
+                resultDiv.className = 'result error';
+            }
+        }
+
+        // 重置当前题目
+        function resetCurrentQuestion() {
+            initGame();
+        }
+
+        // 切换题目
+        function switchQuestion(questionId) {
+            currentQuestion = questionId;
+            
+            // 更新题目按钮状态
+            questionBtns.forEach((btn, index) => {
+                if (index === questionId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // 初始化新题目
+            initGame();
+        }
+
+        // 事件监听
+        submitBtn.addEventListener('click', submitAnswer);
+        resetBtn.addEventListener('click', resetCurrentQuestion);
+
+        questionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const questionId = parseInt(btn.dataset.id);
+                switchQuestion(questionId);
+            });
+        });
+
+        // 初始化游戏
+        initGame();
+    </script>
+</body>
+</html>
